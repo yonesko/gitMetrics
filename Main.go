@@ -38,13 +38,13 @@ func printReport(result *map[string]uint64) {
 //and run recursively for dirs
 func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 	defer func() { group.Done() }()
-	infos, err := filesInDir(dirname)
+	fileInfos, err := filesInDir(dirname)
 	if err != nil {
 		log.Println("can't open " + err.Error() + " " + dirname)
 		return
 	}
 
-	for _, fileInfo := range infos {
+	for _, fileInfo := range fileInfos {
 		fName := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
