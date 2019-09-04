@@ -50,6 +50,10 @@ func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 			group.Add(1)
 			sloc(fName, result, group)
 		} else {
+			extension, ok := extractExtension(&fName)
+			if !ok {
+				continue
+			}
 			regFile, err := os.Open(fName)
 			if err != nil {
 				log.Println("cant open " + err.Error() + " " + fName)
@@ -60,13 +64,17 @@ func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 				log.Println("cant lineCounter " + err.Error() + " " + fName)
 				continue
 			}
-			index := strings.LastIndexByte(fileInfo.Name(), '.')
-			if index >= 0 {
-				(*result)[fileInfo.Name()[index:]] += uint64(counter)
-			}
+			(*result)[extension] += uint64(counter)
 		}
 	}
 
+}
+
+func extractExtension(fileName *string) (string, bool) {
+	if index := strings.LastIndexByte(*fileName, '.'); index >= 0 {
+		return (*fileName)[index:], true
+	}
+	return "", false
 }
 
 func filesInDir(dirname string) ([]os.FileInfo, error) {
