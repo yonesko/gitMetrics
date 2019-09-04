@@ -13,7 +13,15 @@ func main() {
 	rootDir := "/Users/glebio/IdeaProjects/tickets"
 	result := map[string]uint64{}
 	sloc(rootDir, &result)
-	fmt.Println(result)
+	printReport(result)
+}
+
+func printReport(result map[string]uint64) {
+	fmt.Println("Result:")
+
+	for k, v := range result {
+		fmt.Printf("%v %v\n", k, v)
+	}
 }
 
 //add lines to result for regular files
