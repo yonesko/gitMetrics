@@ -8,47 +8,47 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
-var rootDir = flag.String("dir", ".", "root dir")
+var rootDir = flag.String("dir", "/Users/glebio/IdeaProjects/arc/arcadia/afisha", "root dir")
 
 func main() {
 	flag.Parse()
-	result := map[string]uint64{}
+	result := &map[string]uint64{}
 	started := time.Now()
 	fmt.Printf("Started: %v\n", started.Format("15:04:05"))
-	sloc(*rootDir, &result)
+	group := &sync.WaitGroup{}
+	group.Add(1)
+	go sloc(*rootDir, result, group)
+	group.Wait()
 	fmt.Printf("Finished: %v %v\n", time.Now().Format("15:04:05"), time.Since(started))
 	printReport(result)
 }
 
-func printReport(result map[string]uint64) {
+func printReport(result *map[string]uint64) {
 	fmt.Println("Result:")
-
-	for k, v := range result {
+	for k, v := range *result {
 		fmt.Printf("%v %v\n", k, v)
 	}
 }
 
 //add lines to result for regular files
 //and run recursively for dirs
-func sloc(dirname string, result *map[string]uint64) {
-	file, err := os.Open(dirname)
+func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
+	defer func() { group.Done() }()
+	infos, err := filesInDir(dirname)
 	if err != nil {
-		log.Println("cant open " + err.Error() + " " + dirname)
-		return
-	}
-	infos, err := file.Readdir(0)
-	if err != nil {
-		log.Println("cant open " + err.Error() + " " + dirname)
+		log.Println("can't open " + err.Error() + " " + dirname)
 		return
 	}
 
 	for _, f := range infos {
 		fName := dirname + "/" + f.Name()
 		if f.IsDir() {
-			sloc(fName, result)
+			group.Add(1)
+			sloc(fName, result, group)
 		} else {
 			regFile, err := os.Open(fName)
 			if err != nil {
@@ -67,6 +67,18 @@ func sloc(dirname string, result *map[string]uint64) {
 		}
 	}
 
+}
+
+func filesInDir(dirname string) ([]os.FileInfo, error) {
+	file, err := os.Open(dirname)
+	if err != nil {
+		return nil, err
+	}
+	infos, err := file.Readdir(0)
+	if err != nil {
+		return nil, err
+	}
+	return infos, nil
 }
 
 func lineCounter(r io.Reader) (int, error) {
