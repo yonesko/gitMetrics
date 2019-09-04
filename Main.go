@@ -29,6 +29,7 @@ func main() {
 
 func printReport(result map[string]uint64) {
 	//TODO sort by value
+	//TODO pretty values
 	fmt.Println("Result:")
 	for k, v := range result {
 		fmt.Printf("%v %v\n", k, v)
