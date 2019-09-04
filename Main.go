@@ -55,6 +55,7 @@ func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 				log.Println("Can't open " + err.Error() + " " + path)
 				continue
 			}
+			defer func() { err = regFile.Close() }()
 			counter, err := lineCounter(regFile)
 			if err != nil {
 				log.Println("Can't lineCounter " + err.Error() + " " + path)
