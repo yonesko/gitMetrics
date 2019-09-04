@@ -45,30 +45,30 @@ func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 	}
 
 	for _, fileInfo := range fileInfos {
-		fName := dirname + "/" + fileInfo.Name()
+		path := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
-			sloc(fName, result, group)
+			sloc(path, result, group)
 		} else {
-			regFile, err := os.Open(fName)
+			regFile, err := os.Open(path)
 			if err != nil {
-				log.Println("Can't open " + err.Error() + " " + fName)
+				log.Println("Can't open " + err.Error() + " " + path)
 				continue
 			}
 			counter, err := lineCounter(regFile)
 			if err != nil {
-				log.Println("Can't lineCounter " + err.Error() + " " + fName)
+				log.Println("Can't lineCounter " + err.Error() + " " + path)
 				continue
 			}
-			result[extractExtension(&fName)] += uint64(counter)
+			result[extractExtension(fileInfo.Name())] += uint64(counter)
 		}
 	}
 
 }
 
-func extractExtension(fileName *string) string {
-	if index := strings.LastIndexByte(*fileName, '.'); index >= 0 {
-		return (*fileName)[index:]
+func extractExtension(fileName string) string {
+	if index := strings.LastIndexByte(fileName, '.'); index >= 0 {
+		return fileName[index:]
 	}
 	return "without-extension"
 }
@@ -83,6 +83,7 @@ func filesInDir(dirname string) (infos []os.FileInfo, err error) {
 	return
 }
 
+//test buff size
 func lineCounter(r io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
 	count := 0
