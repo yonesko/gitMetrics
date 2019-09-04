@@ -6,10 +6,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
-	rootDir := "/Users/glebio/go/src/gitMetrics"
+	rootDir := "/Users/glebio/IdeaProjects/tickets"
 	result := map[string]uint64{}
 	sloc(rootDir, &result)
 	fmt.Println(result)
@@ -44,7 +45,10 @@ func sloc(dirname string, result *map[string]uint64) {
 				log.Println("cant lineCounter " + err.Error() + " " + fName)
 				continue
 			}
-			(*result)["13"] += uint64(counter)
+			index := strings.LastIndexByte(f.Name(), '.')
+			if index >= 0 {
+				(*result)[f.Name()[index:]] += uint64(counter)
+			}
 		}
 	}
 
