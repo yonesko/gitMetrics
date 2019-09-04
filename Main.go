@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-var rootDir = flag.String("dir", "/Users/glebio/IdeaProjects/arc/arcadia/afisha", "root dir")
+var rootDir = flag.String("dir", ".", "root dir")
 
 func main() {
 	flag.Parse()
-	result := &map[string]uint64{}
+	result := map[string]uint64{}
 	started := time.Now()
 	fmt.Printf("Started: %v\n", started.Format("15:04:05"))
 	group := &sync.WaitGroup{}
@@ -27,16 +27,16 @@ func main() {
 	printReport(result)
 }
 
-func printReport(result *map[string]uint64) {
+func printReport(result map[string]uint64) {
 	fmt.Println("Result:")
-	for k, v := range *result {
+	for k, v := range result {
 		fmt.Printf("%v %v\n", k, v)
 	}
 }
 
 //add lines to result for regular files
 //and run recursively for dirs
-func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
+func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 	defer func() { group.Done() }()
 	fileInfos, err := filesInDir(dirname)
 	if err != nil {
@@ -50,43 +50,37 @@ func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 			group.Add(1)
 			sloc(fName, result, group)
 		} else {
-			extension, ok := extractExtension(&fName)
-			if !ok {
-				continue
-			}
 			regFile, err := os.Open(fName)
 			if err != nil {
-				log.Println("cant open " + err.Error() + " " + fName)
+				log.Println("Can't open " + err.Error() + " " + fName)
 				continue
 			}
 			counter, err := lineCounter(regFile)
 			if err != nil {
-				log.Println("cant lineCounter " + err.Error() + " " + fName)
+				log.Println("Can't lineCounter " + err.Error() + " " + fName)
 				continue
 			}
-			(*result)[extension] += uint64(counter)
+			result[extractExtension(&fName)] += uint64(counter)
 		}
 	}
 
 }
 
-func extractExtension(fileName *string) (string, bool) {
+func extractExtension(fileName *string) string {
 	if index := strings.LastIndexByte(*fileName, '.'); index >= 0 {
-		return (*fileName)[index:], true
+		return (*fileName)[index:]
 	}
-	return "", false
+	return "without-extension"
 }
 
-func filesInDir(dirname string) ([]os.FileInfo, error) {
+func filesInDir(dirname string) (infos []os.FileInfo, err error) {
 	file, err := os.Open(dirname)
 	if err != nil {
 		return nil, err
 	}
-	infos, err := file.Readdir(0)
-	if err != nil {
-		return nil, err
-	}
-	return infos, nil
+	defer func() { err = file.Close() }()
+	infos, err = file.Readdir(0)
+	return
 }
 
 func lineCounter(r io.Reader) (int, error) {
