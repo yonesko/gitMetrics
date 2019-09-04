@@ -51,6 +51,7 @@ func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 			group.Add(1)
 			sloc(path, result, group)
 		} else {
+			//TODO read parallel
 			regFile, err := os.Open(path)
 			if err != nil {
 				log.Println("Can't open " + err.Error() + " " + path)
@@ -85,7 +86,7 @@ func filesInDir(dirname string) (infos []os.FileInfo, err error) {
 	return
 }
 
-//test buff size
+//TODO test buff size
 func lineCounter(r io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
 	count := 0
