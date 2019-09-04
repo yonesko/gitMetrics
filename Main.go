@@ -15,6 +15,8 @@ func main() {
 	fmt.Println(result)
 }
 
+//add lines to result for regular files
+//and run recursively for dirs
 func sloc(dirname string, result *map[string]uint64) {
 	file, err := os.Open(dirname)
 	if err != nil {
