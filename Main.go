@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -10,12 +11,14 @@ import (
 	"time"
 )
 
+var rootDir = flag.String("dir", ".", "root dir")
+
 func main() {
-	rootDir := "/Users/glebio/IdeaProjects/tickets"
+	flag.Parse()
 	result := map[string]uint64{}
 	started := time.Now()
 	fmt.Printf("Started: %v\n", started.Format("15:04:05"))
-	sloc(rootDir, &result)
+	sloc(*rootDir, &result)
 	fmt.Printf("Finished: %v %v\n", time.Now().Format("15:04:05"), time.Since(started))
 	printReport(result)
 }
