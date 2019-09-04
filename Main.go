@@ -44,9 +44,9 @@ func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 		return
 	}
 
-	for _, f := range infos {
-		fName := dirname + "/" + f.Name()
-		if f.IsDir() {
+	for _, fileInfo := range infos {
+		fName := dirname + "/" + fileInfo.Name()
+		if fileInfo.IsDir() {
 			group.Add(1)
 			sloc(fName, result, group)
 		} else {
@@ -60,9 +60,9 @@ func sloc(dirname string, result *map[string]uint64, group *sync.WaitGroup) {
 				log.Println("cant lineCounter " + err.Error() + " " + fName)
 				continue
 			}
-			index := strings.LastIndexByte(f.Name(), '.')
+			index := strings.LastIndexByte(fileInfo.Name(), '.')
 			if index >= 0 {
-				(*result)[f.Name()[index:]] += uint64(counter)
+				(*result)[fileInfo.Name()[index:]] += uint64(counter)
 			}
 		}
 	}
