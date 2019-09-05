@@ -20,8 +20,9 @@ func main() {
 	result := map[string]uint64{}
 	started := time.Now()
 	group := &sync.WaitGroup{}
+	mutex := &sync.Mutex{}
 	group.Add(1)
-	go handleDir(*rootDir, result, group)
+	go handleDir(*rootDir, result, group, mutex)
 	group.Wait()
 	printReport(result, started)
 }
@@ -40,7 +41,7 @@ func printReport(result map[string]uint64, started time.Time) {
 
 //add lines to result for regular files
 //and run recursively for dirs
-func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup) {
+func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, mutex *sync.Mutex) {
 	defer func() { group.Done() }()
 	fileInfos, err := filesInDir(dirname)
 	if err != nil {
@@ -52,7 +53,7 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup) 
 		path := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
-			handleDir(path, result, group)
+			go handleDir(path, result, group, mutex)
 		} else {
 			//TODO read parallel
 			regFile, err := os.Open(path)
@@ -66,7 +67,9 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup) 
 				log.Println("Can't lineCounter " + err.Error() + " " + path)
 				continue
 			}
+			mutex.Lock()
 			result[extractExtension(fileInfo.Name())] += uint64(counter)
+			mutex.Unlock()
 		}
 	}
 
