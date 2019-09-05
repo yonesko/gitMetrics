@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"gitMetrics/utils"
 	"io"
 	"log"
 	"os"
@@ -29,8 +30,8 @@ func main() {
 
 func printReport(result map[string]uint64) {
 	fmt.Println("Lines of code by extension:")
-	for _, pair := range sortByValue(result) {
-		fmt.Printf("%v %v\n", pair.key, pair.val)
+	for _, pair := range utils.SortByValue(result) {
+		fmt.Printf("%v %v\n", pair.Key, pair.Val)
 	}
 }
 
