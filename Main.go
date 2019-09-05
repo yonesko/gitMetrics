@@ -21,7 +21,7 @@ func main() {
 	fmt.Printf("Started: %v\n", started.Format("15:04:05"))
 	group := &sync.WaitGroup{}
 	group.Add(1)
-	go sloc(*rootDir, result, group)
+	go handleDir(*rootDir, result, group)
 	group.Wait()
 	fmt.Printf("Finished: %v %v\n", time.Now().Format("15:04:05"), time.Since(started))
 	printReport(result)
@@ -38,7 +38,7 @@ func printReport(result map[string]uint64) {
 
 //add lines to result for regular files
 //and run recursively for dirs
-func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
+func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 	defer func() { group.Done() }()
 	fileInfos, err := filesInDir(dirname)
 	if err != nil {
@@ -50,7 +50,7 @@ func sloc(dirname string, result map[string]uint64, group *sync.WaitGroup) {
 		path := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
-			sloc(path, result, group)
+			handleDir(path, result, group)
 		} else {
 			//TODO read parallel
 			regFile, err := os.Open(path)
