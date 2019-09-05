@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"gitMetrics/utils"
+	"gitmetrics/utils"
 	"io"
 	"log"
 	"os"
