@@ -28,11 +28,9 @@ func main() {
 }
 
 func printReport(result map[string]uint64) {
-	//TODO sort by value
-	//TODO pretty values
-	fmt.Println("Result:")
-	for k, v := range result {
-		fmt.Printf("%v %v\n", k, v)
+	fmt.Println("Lines of code by extension:")
+	for _, pair := range sortByValue(result) {
+		fmt.Printf("%v %v\n", pair.key, pair.val)
 	}
 }
 
