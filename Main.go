@@ -19,16 +19,15 @@ func main() {
 	flag.Parse()
 	result := map[string]uint64{}
 	started := time.Now()
-	fmt.Printf("Started: %v\n", started.Format("15:04:05"))
 	group := &sync.WaitGroup{}
 	group.Add(1)
 	go handleDir(*rootDir, result, group)
 	group.Wait()
-	fmt.Printf("Finished: %v %v\n", time.Now().Format("15:04:05"), time.Since(started))
-	printReport(result)
+	printReport(result, started)
 }
 
-func printReport(result map[string]uint64) {
+func printReport(result map[string]uint64, started time.Time) {
+	fmt.Printf("Elapsed %v\n", time.Since(started))
 	fmt.Println("Lines of code by extension:")
 	pairs := utils.SortByValue(result)
 	for _, pair := range pairs[:15] {
