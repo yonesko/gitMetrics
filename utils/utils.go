@@ -6,7 +6,7 @@ func SortByValue(m map[string]uint64) pairList {
 	pairList := make(pairList, 0, len(m))
 
 	for k, v := range m {
-		pairList = append(pairList, Pair{k, v})
+		pairList = append(pairList, pair{k, v})
 	}
 
 	sort.Sort(sort.Reverse(pairList))
@@ -14,11 +14,11 @@ func SortByValue(m map[string]uint64) pairList {
 	return pairList
 }
 
-type Pair struct {
+type pair struct {
 	Key string
 	Val uint64
 }
-type pairList []Pair
+type pairList []pair
 
 func (p pairList) Len() int {
 	return len(p)
