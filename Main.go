@@ -30,7 +30,7 @@ func main() {
 
 func printReport(result map[string]uint64) {
 	fmt.Println("Lines of code by extension:")
-	for _, pair := range utils.SortByValue(result) {
+	for _, pair := range utils.SortByValue(result)[:15] {
 		fmt.Printf("%v %v\n", pair.Key, pair.Val)
 	}
 }
