@@ -38,8 +38,12 @@ func main() {
 	var started = time.Now()
 	group.Add(1)
 	go handleDir(rootDir)
-	go printProcessingState()
+	stop := false
+	stopped := make(chan struct{})
+	go printProcessingState(&stop, stopped)
 	group.Wait()
+	stop = true
+	<-stopped
 	printReport(started)
 }
 
@@ -97,14 +101,15 @@ func openOrWait(path string) (*os.File, error) {
 	return file, err
 }
 
-func printProcessingState() {
-	for {
+func printProcessingState(stop *bool, stopped chan struct{}) {
+	for !*stop {
 		fmt.Printf("File processed %10v", util.PrettyBig(filesProcessed))
 		time.Sleep(333)
 		for i := 0; i < 25; i++ {
 			fmt.Print("\r")
 		}
 	}
+	stopped <- struct{}{}
 }
 
 func extractExtension(fileName string) string {
