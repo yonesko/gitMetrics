@@ -69,8 +69,8 @@ func handleDir(dirname string) {
 				log.Println("Can't open " + err.Error() + " " + path)
 				continue
 			}
-			defer func() { err = regFile.Close() }()
 			count, err := countLines(regFile)
+			err = regFile.Close()
 			if err != nil {
 				log.Println("Can't countLines " + err.Error() + " " + path)
 				continue
