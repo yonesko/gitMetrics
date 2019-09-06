@@ -13,9 +13,8 @@ import (
 	"time"
 )
 
-const openFilesLimit = 1024
-
 var rootDir string
+var openFilesLimiter = make(chan int, 1024)
 
 func init() {
 	if len(os.Args) == 2 {
@@ -31,9 +30,8 @@ func main() {
 	started := time.Now()
 	group := &sync.WaitGroup{}
 	mutex := &sync.Mutex{}
-	openFilesLimiter := make(chan int, openFilesLimit)
 	group.Add(1)
-	go handleDir(rootDir, result, group, mutex, openFilesLimiter)
+	go handleDir(rootDir, result, group, mutex)
 	group.Wait()
 	printReport(result, started)
 }
@@ -52,9 +50,9 @@ func printReport(result map[string]uint64, started time.Time) {
 
 //add lines to result for regular files
 //and run recursively for dirs
-func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, mutex *sync.Mutex, openFilesLimiter chan int) {
+func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, mutex *sync.Mutex) {
 	defer func() { group.Done() }()
-	fileInfos, err := filesInDir(dirname, openFilesLimiter)
+	fileInfos, err := filesInDir(dirname)
 	if err != nil {
 		log.Println("can't open " + err.Error() + " " + dirname)
 		return
@@ -64,9 +62,9 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, 
 		path := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
-			go handleDir(path, result, group, mutex, openFilesLimiter)
+			go handleDir(path, result, group, mutex)
 		} else {
-			regFile, err := openOrWait(path, openFilesLimiter)
+			regFile, err := openOrWait(path)
 			if err != nil {
 				log.Println("Can't open " + err.Error() + " " + path)
 				continue
@@ -85,7 +83,7 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, 
 
 }
 
-func openOrWait(path string, openFilesLimiter chan int) (*os.File, error) {
+func openOrWait(path string) (*os.File, error) {
 	openFilesLimiter <- 1
 	defer func() { <-openFilesLimiter }()
 	return os.Open(path)
@@ -98,8 +96,8 @@ func extractExtension(fileName string) string {
 	return "without-extension"
 }
 
-func filesInDir(dirname string, openFilesLimiter chan int) (infos []os.FileInfo, err error) {
-	file, err := openOrWait(dirname, openFilesLimiter)
+func filesInDir(dirname string) (infos []os.FileInfo, err error) {
+	file, err := openOrWait(dirname)
 	if err != nil {
 		return nil, err
 	}
