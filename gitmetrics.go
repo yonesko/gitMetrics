@@ -41,7 +41,7 @@ func printReport(result map[string]uint64, started time.Time) {
 	fmt.Println("Lines of code by extension:")
 	pairs := util.SortMapByValue(result)
 	for _, pair := range pairs[:uint64(math.Min(15, float64(len(pairs))))] {
-		fmt.Printf("%v %v\n", pair.Key, pair.Val)
+		fmt.Printf("%v %v\n", pair.Key, util.PrettyBig(pair.Val))
 	}
 	if len(pairs) > 15 {
 		fmt.Printf("and %v more\n", len(pairs)-15)
