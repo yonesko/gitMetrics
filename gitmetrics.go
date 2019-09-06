@@ -6,7 +6,6 @@ import (
 	"gitmetrics/util"
 	"io"
 	"log"
-	"math"
 	"os"
 	"strings"
 	"sync"
@@ -40,11 +39,12 @@ func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
 	fmt.Println("Lines of code by extension:")
 	pairs := util.SortMapByValue(extSloc)
-	for _, pair := range pairs[:uint64(math.Min(15, float64(len(pairs))))] {
+	numToPrint := util.MinInt(15, len(pairs))
+	for _, pair := range pairs[:numToPrint] {
 		fmt.Printf("%v %v\n", pair.Key, util.PrettyBig(pair.Val))
 	}
-	if len(pairs) > 15 {
-		fmt.Printf("and %v more\n", len(pairs)-15)
+	if len(pairs[numToPrint:]) > 0 {
+		fmt.Printf("and %v more\n", len(pairs[numToPrint:]))
 	}
 }
 
