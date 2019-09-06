@@ -18,6 +18,8 @@ var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
 var extSloc = map[string]uint64{}
 
+//TODO state line
+//TODO avoid links
 func init() {
 	if len(os.Args) == 2 {
 		rootDir = os.Args[1]
