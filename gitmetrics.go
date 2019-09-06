@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"gitmetrics/sort"
+	"gitmetrics/util"
 	"io"
 	"log"
 	"math"
@@ -39,7 +39,7 @@ func main() {
 func printReport(result map[string]uint64, started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
 	fmt.Println("Lines of code by extension:")
-	pairs := sort.SortMapByValue(result)
+	pairs := util.SortMapByValue(result)
 	for _, pair := range pairs[:uint64(math.Min(15, float64(len(pairs))))] {
 		fmt.Printf("%v %v\n", pair.Key, pair.Val)
 	}
