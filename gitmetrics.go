@@ -72,13 +72,13 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, 
 				continue
 			}
 			defer func() { err = regFile.Close() }()
-			counter, err := lineCounter(regFile)
+			count, err := countLines(regFile)
 			if err != nil {
-				log.Println("Can't lineCounter " + err.Error() + " " + path)
+				log.Println("Can't countLines " + err.Error() + " " + path)
 				continue
 			}
 			mutex.Lock()
-			result[extractExtension(fileInfo.Name())] += uint64(counter)
+			result[extractExtension(fileInfo.Name())] += uint64(count)
 			mutex.Unlock()
 		}
 	}
@@ -109,7 +109,7 @@ func filesInDir(dirname string, openFilesLimiter chan int) (infos []os.FileInfo,
 }
 
 //TODO test buff size
-func lineCounter(r io.Reader) (int, error) {
+func countLines(r io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
 	count := 0
 	lineSep := []byte{'\n'}
