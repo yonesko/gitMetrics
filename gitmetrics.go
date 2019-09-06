@@ -20,6 +20,7 @@ var mutex = &sync.Mutex{}
 var filesProcessed uint32
 var filesProcessedPrinted time.Time
 var extSloc = map[string]uint64{}
+var stateStr string
 
 //TODO state line
 //TODO avoid links
@@ -98,7 +99,11 @@ func openOrWait(path string) (*os.File, error) {
 
 func printProcessingState() {
 	if filesProcessedPrinted.IsZero() || time.Since(filesProcessedPrinted).Milliseconds() >= 333 {
-		fmt.Printf("File processed %v\n", filesProcessed)
+		for i := 0; i < len(stateStr); i++ {
+			fmt.Print("\r")
+		}
+		stateStr = fmt.Sprintf("File processed %v", filesProcessed)
+		fmt.Print(stateStr)
 		filesProcessedPrinted = time.Now()
 	}
 }
