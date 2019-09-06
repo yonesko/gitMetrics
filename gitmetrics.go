@@ -37,14 +37,10 @@ func main() {
 
 func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
-	fmt.Println("Lines of code by extension:")
-	pairs := util.SortMapByValue(extSloc)
-	numToPrint := util.MinInt(15, len(pairs))
-	for _, pair := range pairs[:numToPrint] {
-		fmt.Printf("%v %v\n", pair.Key, util.PrettyBig(pair.Val))
-	}
-	if len(pairs[numToPrint:]) > 0 {
-		fmt.Printf("and %v more\n", len(pairs[numToPrint:]))
+	fmt.Printf("%10v %10v\n", "ext", "sloc")
+	fmt.Printf("%10v %10v\n", "---", "---")
+	for _, pair := range util.SortMapByValue(extSloc) {
+		fmt.Printf("%10v %10v\n", pair.Key, util.PrettyBig(pair.Val))
 	}
 }
 
@@ -93,7 +89,7 @@ func extractExtension(fileName string) string {
 	if index := strings.LastIndexByte(fileName, '.'); index >= 0 {
 		return fileName[index:]
 	}
-	return "without-extension"
+	return ""
 }
 
 func filesInDir(dirname string) (infos []os.FileInfo, err error) {
