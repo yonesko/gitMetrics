@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const openFilesLimit = 1024
+
 var rootDir = flag.String("dir", ".", "root dir")
 
 func main() {
@@ -22,8 +24,9 @@ func main() {
 	started := time.Now()
 	group := &sync.WaitGroup{}
 	mutex := &sync.Mutex{}
+	openFilesLimiter := make(chan int, openFilesLimit)
 	group.Add(1)
-	go handleDir(*rootDir, result, group, mutex)
+	go handleDir(*rootDir, result, group, mutex, openFilesLimiter)
 	group.Wait()
 	printReport(result, started)
 }
@@ -42,9 +45,9 @@ func printReport(result map[string]uint64, started time.Time) {
 
 //add lines to result for regular files
 //and run recursively for dirs
-func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, mutex *sync.Mutex) {
+func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, mutex *sync.Mutex, openFilesLimiter chan int) {
 	defer func() { group.Done() }()
-	fileInfos, err := filesInDir(dirname)
+	fileInfos, err := filesInDir(dirname, openFilesLimiter)
 	if err != nil {
 		log.Println("can't open " + err.Error() + " " + dirname)
 		return
@@ -54,10 +57,9 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, 
 		path := dirname + "/" + fileInfo.Name()
 		if fileInfo.IsDir() {
 			group.Add(1)
-			go handleDir(path, result, group, mutex)
+			go handleDir(path, result, group, mutex, openFilesLimiter)
 		} else {
-			//TODO read parallel
-			regFile, err := os.Open(path)
+			regFile, err := openOrWait(path, openFilesLimiter)
 			if err != nil {
 				log.Println("Can't open " + err.Error() + " " + path)
 				continue
@@ -76,6 +78,12 @@ func handleDir(dirname string, result map[string]uint64, group *sync.WaitGroup, 
 
 }
 
+func openOrWait(path string, openFilesLimiter chan int) (*os.File, error) {
+	openFilesLimiter <- 1
+	defer func() { <-openFilesLimiter }()
+	return os.Open(path)
+}
+
 func extractExtension(fileName string) string {
 	if index := strings.LastIndexByte(fileName, '.'); index >= 0 {
 		return fileName[index:]
@@ -83,8 +91,8 @@ func extractExtension(fileName string) string {
 	return "without-extension"
 }
 
-func filesInDir(dirname string) (infos []os.FileInfo, err error) {
-	file, err := os.Open(dirname)
+func filesInDir(dirname string, openFilesLimiter chan int) (infos []os.FileInfo, err error) {
+	file, err := openOrWait(dirname, openFilesLimiter)
 	if err != nil {
 		return nil, err
 	}
