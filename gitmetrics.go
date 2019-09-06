@@ -23,10 +23,13 @@ var extSloc = map[string]uint64{}
 //TODO state line
 //TODO avoid links
 func init() {
-	if len(os.Args) == 2 {
+	switch len(os.Args) {
+	case 2:
 		rootDir = os.Args[1]
-	} else {
-		fmt.Println("Usage: gitmetrics dir")
+	case 1:
+		rootDir = "."
+	default:
+		fmt.Println("Usage: gitmetrics <dir>")
 		os.Exit(0)
 	}
 }
