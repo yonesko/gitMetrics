@@ -22,3 +22,6 @@ Elapsed 2.003027888s
        .gz         3k
      .lock         3k
 ```
+
+TODO:
+git metrics
