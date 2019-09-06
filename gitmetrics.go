@@ -18,6 +18,7 @@ var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
 var filesProcessed uint32
+var filesProcessedPrinted time.Time
 var extSloc = map[string]uint64{}
 
 //TODO state line
@@ -90,8 +91,16 @@ func openOrWait(path string) (*os.File, error) {
 	file, err := os.Open(path)
 	if err == nil {
 		atomic.AddUint32(&filesProcessed, 1)
+		printProcessingState()
 	}
 	return file, err
+}
+
+func printProcessingState() {
+	if filesProcessedPrinted.IsZero() || time.Since(filesProcessedPrinted).Milliseconds() >= 333 {
+		fmt.Printf("File processed %v\n", filesProcessed)
+		filesProcessedPrinted = time.Now()
+	}
 }
 
 func extractExtension(fileName string) string {
