@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -16,6 +17,7 @@ var rootDir string
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
+var filesProcessed uint32
 var extSloc = map[string]uint64{}
 
 //TODO state line
@@ -39,6 +41,7 @@ func main() {
 
 func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
+	fmt.Printf("File processed %v\n", filesProcessed)
 	fmt.Printf("%10v %10v\n", "ext", "sloc")
 	fmt.Printf("%10v %10v\n", "---", "---")
 	for _, pair := range util.SortMapByValue(extSloc) {
@@ -84,7 +87,11 @@ func handleDir(dirname string) {
 func openOrWait(path string) (*os.File, error) {
 	openFilesLimiter <- 1
 	defer func() { <-openFilesLimiter }()
-	return os.Open(path)
+	file, err := os.Open(path)
+	if err == nil {
+		atomic.AddUint32(&filesProcessed, 1)
+	}
+	return file, err
 }
 
 func extractExtension(fileName string) string {
