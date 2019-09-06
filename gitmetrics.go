@@ -17,10 +17,8 @@ var rootDir string
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
-var filesProcessed uint32
-var filesProcessedPrinted time.Time
+var filesProcessed uint64
 var extSloc = map[string]uint64{}
-var stateStr string
 
 //TODO state line
 //TODO avoid links
@@ -37,6 +35,7 @@ func main() {
 	var started = time.Now()
 	group.Add(1)
 	go handleDir(rootDir)
+	go printProcessingState()
 	group.Wait()
 	printReport(started)
 }
@@ -91,20 +90,18 @@ func openOrWait(path string) (*os.File, error) {
 	defer func() { <-openFilesLimiter }()
 	file, err := os.Open(path)
 	if err == nil {
-		atomic.AddUint32(&filesProcessed, 1)
-		printProcessingState()
+		atomic.AddUint64(&filesProcessed, 1)
 	}
 	return file, err
 }
 
 func printProcessingState() {
-	if filesProcessedPrinted.IsZero() || time.Since(filesProcessedPrinted).Milliseconds() >= 333 {
-		for i := 0; i < len(stateStr); i++ {
+	for {
+		fmt.Printf("File processed %10v", util.PrettyBig(filesProcessed))
+		time.Sleep(333)
+		for i := 0; i < 25; i++ {
 			fmt.Print("\r")
 		}
-		stateStr = fmt.Sprintf("File processed %v", filesProcessed)
-		fmt.Print(stateStr)
-		filesProcessedPrinted = time.Now()
 	}
 }
 
