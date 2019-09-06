@@ -17,7 +17,7 @@ var rootDir string
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
-var result = map[string]uint64{}
+var extSloc = map[string]uint64{}
 
 func init() {
 	if len(os.Args) == 2 {
@@ -33,13 +33,13 @@ func main() {
 	group.Add(1)
 	go handleDir(rootDir)
 	group.Wait()
-	printReport(result, started)
+	printReport(started)
 }
 
-func printReport(result map[string]uint64, started time.Time) {
+func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
 	fmt.Println("Lines of code by extension:")
-	pairs := util.SortMapByValue(result)
+	pairs := util.SortMapByValue(extSloc)
 	for _, pair := range pairs[:uint64(math.Min(15, float64(len(pairs))))] {
 		fmt.Printf("%v %v\n", pair.Key, util.PrettyBig(pair.Val))
 	}
@@ -48,7 +48,7 @@ func printReport(result map[string]uint64, started time.Time) {
 	}
 }
 
-//add lines to result for regular files
+//add lines to extSloc for regular files
 //and run recursively for dirs
 func handleDir(dirname string) {
 	defer func() { group.Done() }()
@@ -76,7 +76,7 @@ func handleDir(dirname string) {
 				continue
 			}
 			mutex.Lock()
-			result[extractExtension(fileInfo.Name())] += uint64(count)
+			extSloc[extractExtension(fileInfo.Name())] += uint64(count)
 			mutex.Unlock()
 		}
 	}
