@@ -42,7 +42,6 @@ func main() {
 
 func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
-	fmt.Printf("File processed %v\n", filesProcessed)
 	fmt.Printf("%10v %10v\n", "ext", "sloc")
 	fmt.Printf("%10v %10v\n", "---", "---")
 	for _, pair := range util.SortMapByValue(extSloc) {
