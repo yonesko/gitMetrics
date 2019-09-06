@@ -20,7 +20,6 @@ var mutex = &sync.Mutex{}
 var filesProcessed uint64
 var extSloc = map[string]uint64{}
 
-//TODO state line
 //TODO avoid links
 func init() {
 	switch len(os.Args) {
