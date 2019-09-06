@@ -15,7 +15,6 @@ import (
 
 var rootDir string
 var openFilesLimiter = make(chan int, 1024)
-var started = time.Now()
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
 var result = map[string]uint64{}
@@ -30,6 +29,7 @@ func init() {
 }
 
 func main() {
+	var started = time.Now()
 	group.Add(1)
 	go handleDir(rootDir)
 	group.Wait()
