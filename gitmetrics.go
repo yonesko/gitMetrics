@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"gitmetrics/sort"
 	"io"
@@ -16,17 +15,25 @@ import (
 
 const openFilesLimit = 1024
 
-var rootDir = flag.String("dir", ".", "root dir")
+var rootDir string
+
+func init() {
+	if len(os.Args) == 2 {
+		rootDir = os.Args[1]
+	} else {
+		fmt.Println("Usage: gitmetrics dir")
+		os.Exit(0)
+	}
+}
 
 func main() {
-	flag.Parse()
 	result := map[string]uint64{}
 	started := time.Now()
 	group := &sync.WaitGroup{}
 	mutex := &sync.Mutex{}
 	openFilesLimiter := make(chan int, openFilesLimit)
 	group.Add(1)
-	go handleDir(*rootDir, result, group, mutex, openFilesLimiter)
+	go handleDir(rootDir, result, group, mutex, openFilesLimiter)
 	group.Wait()
 	printReport(result, started)
 }
