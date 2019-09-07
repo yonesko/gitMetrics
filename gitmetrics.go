@@ -51,7 +51,7 @@ func printReport(started time.Time) {
 	fmt.Printf("%10v %10v\n", "ext", "sloc")
 	fmt.Printf("%10v %10v\n", "---", "---")
 	for _, pair := range util.SortMapByValue(extSloc) {
-		fmt.Printf("%10v %10v\n", pair.Key, util.PrettyBig(pair.Val))
+		fmt.Printf("%10v %10v\n", pair.Key, util.PrettyBigInteger(pair.Val))
 	}
 }
 
@@ -102,12 +102,13 @@ func openOrWait(path string) (*os.File, error) {
 
 func printProcessingState(stop *bool, stopped chan struct{}) {
 	for !*stop {
-		fmt.Printf("File processed %10v", util.PrettyBig(filesProcessed))
+		fmt.Printf("File processed %10v", filesProcessed)
 		time.Sleep(333)
 		for i := 0; i < 25; i++ {
 			fmt.Print("\r")
 		}
 	}
+	fmt.Println("")
 	stopped <- struct{}{}
 }
 
