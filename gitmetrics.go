@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"gitmetrics/util"
-	"io"
 	"log"
 	"os"
 	"strings"
@@ -77,7 +75,7 @@ func handleDir(dirname string) {
 				log.Println("Can't open " + err.Error() + " " + path)
 				continue
 			}
-			count, err := countLines(regFile)
+			count, err := util.CountLines(regFile)
 			err = regFile.Close()
 			if err != nil {
 				log.Println("Can't countLines " + err.Error() + " " + path)
@@ -130,24 +128,4 @@ func filesInDir(dirname string) (infos []os.FileInfo, err error) {
 	defer func() { err = file.Close() }()
 	infos, err = file.Readdir(0)
 	return
-}
-
-//TODO test buff size
-func countLines(r io.Reader) (int, error) {
-	buf := make([]byte, 32*1024)
-	count := 0
-	lineSep := []byte{'\n'}
-
-	for {
-		c, err := r.Read(buf)
-		count += bytes.Count(buf[:c], lineSep)
-
-		switch {
-		case err == io.EOF:
-			return count, nil
-
-		case err != nil:
-			return count, err
-		}
-	}
 }
