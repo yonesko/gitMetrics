@@ -19,6 +19,7 @@ var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
 var filesProcessed uint64
 var extSloc = map[string]uint64{}
+var extCount = map[string]uint64{}
 
 //TODO avoid links
 func init() {
@@ -48,10 +49,10 @@ func main() {
 
 func printReport(started time.Time) {
 	fmt.Printf("Elapsed %v\n", time.Since(started))
-	fmt.Printf("%10v %10v\n", "ext", "sloc")
-	fmt.Printf("%10v %10v\n", "---", "---")
+	fmt.Printf("%10v %10v %10v\n", "ext", "sloc", "count")
+	fmt.Printf("%10v %10v %10v\n", "---", "---", "---")
 	for _, pair := range util.SortMapByValue(extSloc) {
-		fmt.Printf("%10v %10v\n", pair.Key, util.PrettyBig(pair.Val))
+		fmt.Printf("%10v %10v %10v\n", pair.Key, util.PrettyBig(extSloc[pair.Key]), extCount[pair.Key])
 	}
 }
 
@@ -83,7 +84,9 @@ func handleDir(dirname string) {
 				continue
 			}
 			mutex.Lock()
-			extSloc[extractExtension(fileInfo.Name())] += uint64(count)
+			extension := extractExtension(fileInfo.Name())
+			extSloc[extension] += uint64(count)
+			extCount[extension] += 1
 			mutex.Unlock()
 		}
 	}
