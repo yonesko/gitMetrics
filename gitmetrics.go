@@ -1,12 +1,10 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"gitmetrics/util"
 	"log"
 	"os"
-	"runtime/pprof"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -20,23 +18,9 @@ var mutex = &sync.Mutex{}
 var filesProcessed uint64
 var extSloc = map[string]uint64{}
 var extCount = map[string]uint64{}
-var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 //TODO avoid links
 func init() {
-	flag.Parse()
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = pprof.StartCPUProfile(f)
-		if err != nil {
-			panic("can't StartCPUProfile " + err.Error())
-		}
-		defer pprof.StopCPUProfile()
-	}
-
 	switch len(os.Args) {
 	case 2:
 		rootDir = os.Args[1]
