@@ -52,7 +52,7 @@ func printReport(started time.Time) {
 	fmt.Printf("%10v %10v %10v\n", "ext", "sloc", "count")
 	fmt.Printf("%10v %10v %10v\n", "---", "---", "---")
 	for _, pair := range util.SortMapByValue(extSloc) {
-		fmt.Printf("%10v %10v %10v\n", pair.Key, util.PrettyBigInteger(extSloc[pair.Key]), extCount[pair.Key])
+		fmt.Printf("%10v %10v %10v\n", pair.Key, util.AbrvInteger(extSloc[pair.Key]), extCount[pair.Key])
 	}
 }
 

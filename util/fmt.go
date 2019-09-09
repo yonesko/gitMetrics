@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func PrettyBigInteger(v uint64) string {
+func AbrvInteger(v uint64) string {
 	if v >= 1e6 {
 		return fmt.Sprintf("%v%v", v/1e6, "m")
 	}
