@@ -17,7 +17,6 @@ import (
 
 var rootDir string
 var cpuProf = flag.String("cpup", "", "cpu profile file")
-var memProf = flag.String("memp", "", "mem profile file")
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
@@ -27,7 +26,6 @@ var extCount = map[string]uint64{}
 
 //TODO avoid links
 func init() {
-	flag.Parse()
 	rootDir = flag.Arg(0)
 	if rootDir == "" {
 		rootDir = "."
@@ -35,6 +33,7 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
 	var started = time.Now()
 	if startCPUProfile() {
 		defer pprof.StopCPUProfile()
