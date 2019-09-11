@@ -124,7 +124,7 @@ func openOrWait(path string) (*os.File, error) {
 func printProcessingState(stop *bool, stopped chan struct{}) {
 	for !*stop {
 		fmt.Printf("Files processed %10v", filesProcessed)
-		time.Sleep(333)
+		time.Sleep(333 * time.Millisecond)
 		for i := 0; i < 25; i++ {
 			fmt.Print("\r")
 		}
