@@ -8,6 +8,10 @@ func Test_extractExtension(t *testing.T) {
 		want string
 	}{
 		{"", ""},
+		{"1.txt", ".txt"},
+		{"1.txt.pdf", ".pdf"},
+		{"1.tx.t.pdf", ".pdf"},
+		{"input", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
