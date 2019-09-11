@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"gitmetrics/util"
 	"log"
 	"os"
+	"runtime/pprof"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -12,6 +14,8 @@ import (
 )
 
 var rootDir string
+var cpuProf = flag.String("cpup", "", "cpu profile file")
+var memProf = flag.String("memp", "", "mem profile file")
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
 var mutex = &sync.Mutex{}
@@ -21,19 +25,18 @@ var extCount = map[string]uint64{}
 
 //TODO avoid links
 func init() {
-	switch len(os.Args) {
-	case 2:
-		rootDir = os.Args[1]
-	case 1:
+	flag.Parse()
+	rootDir = flag.Arg(0)
+	if rootDir == "" {
 		rootDir = "."
-	default:
-		fmt.Println("Usage: gitmetrics <dir>")
-		os.Exit(0)
 	}
 }
 
 func main() {
 	var started = time.Now()
+	if startCPUProfile() {
+		defer pprof.StopCPUProfile()
+	}
 	group.Add(1)
 	go handleDir(rootDir)
 	stop := false
@@ -43,6 +46,23 @@ func main() {
 	stop = true
 	<-stopped
 	printReport(started)
+}
+
+func startCPUProfile() bool {
+	if *cpuProf == "" {
+		return false
+	}
+	file, err := os.Create(*cpuProf)
+	if err != nil {
+		println("Can't StartCPUProfile: " + err.Error())
+		return false
+	}
+	err = pprof.StartCPUProfile(file)
+	if err != nil {
+		println("Can't StartCPUProfile: " + err.Error())
+		return false
+	}
+	return true
 }
 
 func printReport(started time.Time) {
