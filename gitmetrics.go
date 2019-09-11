@@ -156,11 +156,9 @@ var countLinesBuffer = make([]byte, 1024*1024)
 
 func countLines(r io.Reader) (int, error) {
 	count := 0
-	lineSep := []byte{'\n'}
-
 	for {
 		c, err := r.Read(countLinesBuffer)
-		count += bytes.Count(countLinesBuffer[:c], lineSep)
+		count += bytes.Count(countLinesBuffer[:c], []byte{'\n'})
 
 		switch {
 		case err == io.EOF:
