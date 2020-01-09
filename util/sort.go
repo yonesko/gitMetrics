@@ -9,7 +9,7 @@ func SortMapByValue(m map[string]uint64) PairList {
 		pairList = append(pairList, pair{k, v})
 	}
 
-	sort.Sort(sort.Reverse(pairList))
+	sort.Sort(pairList)
 
 	return pairList
 }
