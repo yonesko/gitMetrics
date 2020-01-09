@@ -15,7 +15,6 @@ import (
 	"time"
 )
 
-var rootDir string
 var cpuProf = flag.String("cpup", "", "cpu profile file")
 var openFilesLimiter = make(chan int, 1024)
 var group = &sync.WaitGroup{}
@@ -24,16 +23,9 @@ var filesProcessed uint64
 var extSloc = map[string]uint64{}
 var extCount = map[string]uint64{}
 
-//TODO avoid links
-func init() {
-	rootDir = flag.Arg(0)
-	if rootDir == "" {
-		rootDir = "."
-	}
-}
-
 func main() {
 	flag.Parse()
+	rootDir := rootDir()
 	var started = time.Now()
 	if startCPUProfile() {
 		defer pprof.StopCPUProfile()
@@ -47,6 +39,13 @@ func main() {
 	stop = true
 	<-stopped
 	printReport(started)
+}
+
+func rootDir() string {
+	if flag.Arg(0) == "" {
+		return "."
+	}
+	return flag.Arg(0)
 }
 
 func startCPUProfile() bool {
