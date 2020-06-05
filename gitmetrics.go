@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"gitmetrics/util"
 	"io"
 	"log"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/yonesko/gitmetrics/util"
 )
 
 var cpuProf = flag.String("cpup", "", "cpu profile file")
