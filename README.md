@@ -2,7 +2,7 @@
 CLI Tool for counting line of codes by file extension.
 Example:
 ```
-glebio-osx:gitmetrics glebio$ gitmetrics repo
+$ gitmetrics repo
 Elapsed 2.003027888s
        ext       sloc
        ---        ---
@@ -23,5 +23,3 @@ Elapsed 2.003027888s
      .lock         3k
 ```
 
-TODO:
-git metrics
